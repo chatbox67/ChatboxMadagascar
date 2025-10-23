@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mon IA Locale</title>
+<style>
+#chat { max-width: 600px; margin: auto; }
+.user { color: blue; }
+.bot { color: green; }
+</style>
+</head>
+<body>
+<h1>Mon IA Locale</h1>
+<div id="chat"></div>
+<input id="input" placeholder="Écrivez quelque chose..." style="width: 80%;">
+<button onclick="sendMessage()">Envoyer</button>
+
+<script>
+function typeText(text, element) {
+    let i = 0;
+    element.innerHTML = "";
+    let interval = setInterval(() => {
+        element.innerHTML += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+    }, 50);
+}
+
+function sendMessage() {
+    const input = document.getElementById("input");
+    const chat = document.getElementById("chat");
+
+    let userMessage = input.value.trim();
+    if (!userMessage) return;
+
+    chat.innerHTML += `<div class="user"><b>Vous:</b> ${userMessage}</div>`;
+
+    let botDiv = document.createElement("div");
+    botDiv.className = "bot";
+    chat.appendChild(botDiv);
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: userMessage})
+    })
+    .then(res => res.json())
+    .then(data => typeText(data.reply, botDiv));
+
+    input.value = "";
+    chat.scrollTop = chat.scrollHeight;
+}
+</script>
+</body>
+</html>
